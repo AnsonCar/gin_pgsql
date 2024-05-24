@@ -1,34 +1,28 @@
 package main
 
 import (
+	test "db_api/src/test"
+	user "db_api/src/user"
+
+	docs "db_api/docs"
+	// docs "db_api/docs"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	swaggerfiles "github.com/swaggo/files"
+	gs "github.com/swaggo/gin-swagger"
 )
 
-var db *gorm.DB
-
-func init() {
-	//创建一个数据库的连接
-	var err error
-	// db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-}
-
+// @title DataBase API
+// @version 1.0
 func main() {
-
+	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := router.Group("/api/v1/")
-	{
-		api := v1.Group("/test")
-		api.POST("/", create)
-		api.GET("/", fetchAll)
-		api.GET("/:id", fetchSingle)
-		api.PUT("/:id", update)
-		api.DELETE("/:id", delete)
-	}
-	println("Listening and serving HTTP on 127.0.0.1:8080\n")
+
+	test.Router(v1, "test")
+	user.Router(v1, "user")
+
+	router.GET("/docs/*any", gs.WrapHandler(swaggerfiles.Handler))
+	println("\nListening and serving HTTP on http://127.0.0.1:8080\n")
 	router.Run()
 }
